@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Register • Color Trading</title>
-  <meta name="viewport" content="width=device-width,initial‑scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -11,10 +11,9 @@
       background: #1a1a2e;
       color: #eee;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height:100vh;
+      height: 100vh;
     }
     .container {
       background: #16213e;
@@ -23,23 +22,24 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.5);
       width: 90%;
       max-width: 360px;
+      text-align: center;
     }
     h2 {
-      text-align:center;
-      margin-bottom:1.5rem;
-      font-weight:normal;
-      color:#e94560;
+      margin-bottom: 1.5rem;
+      font-weight: normal;
+      color: #e94560;
     }
     .input-group {
-      margin-bottom:1rem;
+      margin-bottom: 1rem;
+      text-align: left;
     }
     label {
       display:block;
-      margin-bottom:.5rem;
-      font-size:.9rem;
-      color:#a5a5a5;
+      margin-bottom: .5rem;
+      font-size: .9rem;
+      color: #a5a5a5;
     }
-    input[type="text"] {
+    input {
       width:100%;
       padding:.75rem;
       border:none;
@@ -55,6 +55,7 @@
     button {
       width:100%;
       padding:.85rem;
+      margin-top:.5rem;
       border:none;
       border-radius:4px;
       background:#e94560;
@@ -72,35 +73,104 @@
       margin-top:.5rem;
       display:none;
     }
+    #status {
+      margin-top:1rem;
+      font-size: .95rem;
+      color: #a5a5a5;
+    }
+    #recaptcha-container {
+      margin: 15px 0;
+      transform: scale(0.85);
+      transform-origin: center;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h2>Create Account</h2>
-
     <div class="input-group">
       <label for="invitation">Invitation Code</label>
-      <input type="text" id="invitation" placeholder="Enter your invitation code">
-      <div class="error" id="err-code">Please enter a valid code</div>
+      <input type="text" id="invitation" placeholder="Enter invitation code">
+      <div class="success" id="err-code"></div>
     </div>
 
-    <button id="btnRegister">REGISTER</button>
+    <div class="input-group">
+      <label for="phone">Phone Number</label>
+      <input type="text" id="phone" placeholder="+91XXXXXXXXXX">
+      <div class="error" id="err-phone">Enter valid phone number</div>
+    </div>
+
+    <div id="recaptcha-container"></div>
+
+    <button id="btnSendOTP">Send OTP</button>
+
+    <div class="input-group" style="display:none;" id="otp-group">
+      <label for="otp">OTP</label>
+      <input type="text" id="otp" placeholder="Enter OTP">
+      <div class="error" id="err-otp">Invalid OTP</div>
+    </div>
+
+    <button id="btnVerifyOTP" style="display:none;">Verify & Register</button>
+
+    <div id="status"></div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script>
-    document.getElementById('btnRegister').onclick = () => {
-      const code = document.getElementById('invitation').value.trim();
-      const err = document.getElementById('err-code');
+    // TODO: Replace with YOUR Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-      if (!code || !/^\d{12,}$/.test(code)) {
-        err.style.display = 'block';
-      } else {
-        err.style.display = 'none';
-        // simulate redirect
-        const url = `https://www.yoursite.org/register?invitationCode=${code}`;
-        window.location.href = url;
+    const recaptcha = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'normal'
+    });
+
+    let confirmationResult;
+
+    document.getElementById('btnSendOTP').onclick = () => {
+      const code = document.getElementById('invitation').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+
+      document.getElementById('err-code').style.display = /^\d{9,}$/.test(code) ? 'none' : 'block';
+      document.getElementById('err-phone').style.display = /^\+\d{10,15}$/.test(phone) ? 'none' : 'block';
+
+      if (document.getElementById('err-code').style.display === 'none' &&
+          document.getElementById('err-phone').style.display === 'none') {
+        auth.signInWithPhoneNumber(phone, recaptcha)
+          .then(result => {
+            confirmationResult = result;
+            document.getElementById('status').textContent = "OTP sent!";
+            document.getElementById('otp-group').style.display = 'block';
+            document.getElementById('btnVerifyOTP').style.display = 'block';
+            document.getElementById('btnSendOTP').style.display = 'none';
+          })
+          .catch(err => alert(err.message));
       }
+    };
+
+    document.getElementById('btnVerifyOTP').onclick = () => {
+      const otp = document.getElementById('otp').value.trim();
+      confirmationResult.confirm(otp)
+        .then(userCred => {
+          const code = document.getElementById('invitation').value.trim();
+          const phone = userCred.user.phoneNumber;
+          // Replace with backend API call to register user
+          const redirect = `https://www.yoursite.org/register?invitationCode=${code}&phone=${encodeURIComponent(phone)}`;
+          window.location.href = redirect;
+        })
+        .catch(() => {
+          document.getElementById('err-otp').style.display = 'block';
+        });
     };
   </script>
 

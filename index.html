@@ -2,115 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>🎨 Color Trading Game</title>
+  <title>Register • Color Trading</title>
+  <meta name="viewport" content="width=device-width,initial‑scale=1">
   <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f0f0f0;
-      text-align: center;
-    }
-
-    header {
-      background-color: #222;
-      color: white;
-      padding: 20px;
-    }
-
-    h1 {
-      margin: 0;
-    }
-
-    .wallet {
-      background-color: #fff;
-      padding: 10px;
-      margin: 10px auto;
-      width: 200px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      font-size: 18px;
-    }
-
-    .grid {
+      font-family: Arial, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
       justify-content: center;
-      margin: 20px;
+      min-height:100vh;
     }
-
-    .color-box {
-      width: 100px;
-      height: 100px;
-      margin: 10px;
-      border-radius: 10px;
-      border: 3px solid transparent;
-      transition: 0.3s;
-      cursor: pointer;
+    .container {
+      background: #16213e;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      width: 90%;
+      max-width: 360px;
     }
-
-    .color-box:hover {
-      border-color: #444;
-      transform: scale(1.05);
+    h2 {
+      text-align:center;
+      margin-bottom:1.5rem;
+      font-weight:normal;
+      color:#e94560;
     }
-
-    footer {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #666;
+    .input-group {
+      margin-bottom:1rem;
+    }
+    label {
+      display:block;
+      margin-bottom:.5rem;
+      font-size:.9rem;
+      color:#a5a5a5;
+    }
+    input[type="text"] {
+      width:100%;
+      padding:.75rem;
+      border:none;
+      border-radius:4px;
+      font-size:1rem;
+      background:#0f3460;
+      color:#eee;
+    }
+    input:focus {
+      outline:none;
+      background:#25316d;
+    }
+    button {
+      width:100%;
+      padding:.85rem;
+      border:none;
+      border-radius:4px;
+      background:#e94560;
+      color:#fff;
+      font-size:1rem;
+      cursor:pointer;
+      transition:background .3s;
+    }
+    button:hover {
+      background:#d03e55;
+    }
+    .error {
+      color:#ff6b6b;
+      font-size:.85rem;
+      margin-top:.5rem;
+      display:none;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>🎨 Color Trading</h1>
-  </header>
+  <div class="container">
+    <h2>Create Account</h2>
 
-  <div class="wallet">
-    💰 Coins: <span id="coins">100</span>
+    <div class="input-group">
+      <label for="invitation">Invitation Code</label>
+      <input type="text" id="invitation" placeholder="Enter your invitation code">
+      <div class="error" id="err-code">Please enter a valid code</div>
+    </div>
+
+    <button id="btnRegister">REGISTER</button>
   </div>
 
-  <div class="grid" id="colorGrid"></div>
-
-  <footer>
-    &copy; 2025 Color Trading. Free demo.
-  </footer>
-
   <script>
-    const colors = [
-      "#FF0000", "#00FF00", "#0000FF", "#FFFF00",
-      "#FF00FF", "#00FFFF", "#FFA500", "#A52A2A",
-      "#008000", "#800080", "#FFC0CB", "#808080"
-    ];
+    document.getElementById('btnRegister').onclick = () => {
+      const code = document.getElementById('invitation').value.trim();
+      const err = document.getElementById('err-code');
 
-    const colorGrid = document.getElementById("colorGrid");
-    const coinsDisplay = document.getElementById("coins");
-
-    let coins = 100;
-
-    function renderColors() {
-      colorGrid.innerHTML = "";
-      colors.forEach(color => {
-        const div = document.createElement("div");
-        div.className = "color-box";
-        div.style.backgroundColor = color;
-
-        div.onclick = () => {
-          const price = 20;
-          if (coins >= price) {
-            coins -= price;
-            alert(`✅ You bought ${color} for ${price} coins!`);
-            coinsDisplay.textContent = coins;
-          } else {
-            alert("❌ Not enough coins!");
-          }
-        };
-
-        colorGrid.appendChild(div);
-      });
-    }
-
-    renderColors();
+      if (!code || !/^\d{12,}$/.test(code)) {
+        err.style.display = 'block';
+      } else {
+        err.style.display = 'none';
+        // simulate redirect
+        const url = `https://www.yoursite.org/register?invitationCode=${code}`;
+        window.location.href = url;
+      }
+    };
   </script>
 
 </body>

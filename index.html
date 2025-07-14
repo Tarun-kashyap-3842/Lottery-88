@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎨 Color Trading Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+
+    header {
+      background-color: #222;
+      color: white;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 0;
+    }
+
+    .wallet {
+      background-color: #fff;
+      padding: 10px;
+      margin: 10px auto;
+      width: 200px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      font-size: 18px;
+    }
+
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px;
+    }
+
+    .color-box {
+      width: 100px;
+      height: 100px;
+      margin: 10px;
+      border-radius: 10px;
+      border: 3px solid transparent;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .color-box:hover {
+      border-color: #444;
+      transform: scale(1.05);
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🎨 Color Trading</h1>
+  </header>
+
+  <div class="wallet">
+    💰 Coins: <span id="coins">100</span>
+  </div>
+
+  <div class="grid" id="colorGrid"></div>
+
+  <footer>
+    &copy; 2025 Color Trading. Free demo.
+  </footer>
+
+  <script>
+    const colors = [
+      "#FF0000", "#00FF00", "#0000FF", "#FFFF00",
+      "#FF00FF", "#00FFFF", "#FFA500", "#A52A2A",
+      "#008000", "#800080", "#FFC0CB", "#808080"
+    ];
+
+    const colorGrid = document.getElementById("colorGrid");
+    const coinsDisplay = document.getElementById("coins");
+
+    let coins = 100;
+
+    function renderColors() {
+      colorGrid.innerHTML = "";
+      colors.forEach(color => {
+        const div = document.createElement("div");
+        div.className = "color-box";
+        div.style.backgroundColor = color;
+
+        div.onclick = () => {
+          const price = 20;
+          if (coins >= price) {
+            coins -= price;
+            alert(`✅ You bought ${color} for ${price} coins!`);
+            coinsDisplay.textContent = coins;
+          } else {
+            alert("❌ Not enough coins!");
+          }
+        };
+
+        colorGrid.appendChild(div);
+      });
+    }
+
+    renderColors();
+  </script>
+
+</body>
+</html>
